@@ -74,6 +74,14 @@ const gameBoard = function () {
 
   const getGrid = (i, j) => grid[Number(i)][Number(j)].getTokenType();
 
+  const clearGrid = function () {
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        grid[i][j].setTokenType(0);
+      }
+    }
+  };
+
   return {
     grid,
     checkWinningMove,
@@ -81,6 +89,7 @@ const gameBoard = function () {
     getRows,
     getCols,
     getGrid,
+    clearGrid,
   };
 };
 
@@ -135,6 +144,13 @@ const gameController = function () {
 
   const getWinner = () => winner;
   const getGrid = (i, j) => board.getGrid(i, j);
+  const clearGrid = (i, j) => board.clearGrid(i, j);
+
+  const clearGame = function () {
+    clearGrid();
+    currentPlayer = players[0];
+    winner = null;
+  };
 
   return {
     board,
@@ -147,6 +163,8 @@ const gameController = function () {
     getGrid,
     switchTurns,
     getWinner,
+    clearGrid,
+    clearGame,
   };
 };
 
@@ -156,6 +174,7 @@ const displayController = (function () {
   const playerName = playerTurnText.querySelector("span");
   const grid = document.querySelector(".grid");
   const cells = document.querySelectorAll(".cell");
+  const restartButton = document.querySelector(".restart-button");
 
   playerName.textContent = game.getCurrentPlayerName();
 
@@ -167,9 +186,19 @@ const displayController = (function () {
     }
   }
 
+  const display = function () {
+    playerName.textContent = game.getCurrentPlayerName();
+    cells.forEach((cell) => {
+      let coords = cell.id;
+      console.log(coords);
+      let [i, j] = [Number(coords[0]), Number(coords[1])];
+
+      cell.textContent = "";
+    });
+  };
+
   cells.forEach((cell) => {
     cell.addEventListener("click", (e) => {
-      //Only runs when there's no winner yet.
       if (game.getWinner() === null) {
         let coords = e.target.id.split(",");
         let [i, j] = [Number(coords[0]), Number(coords[1])];
@@ -177,10 +206,19 @@ const displayController = (function () {
         console.log(i, j);
         game.currentRound(i, j);
         cell.textContent = game.getGrid(i, j);
-        // game.switchTurns(game.getCurrentPlayer());
+
         playerName.textContent = game.getCurrentPlayerName();
+
+        if (game.getWinner() !== null) {
+          playerName.textContent = "Player wins!";
+        }
       }
     });
+  });
+
+  restartButton.addEventListener("click", (e) => {
+    game.clearGame();
+    display();
   });
 
   return {};
