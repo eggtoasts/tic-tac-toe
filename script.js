@@ -18,39 +18,97 @@ const gameBoard = (function () {
     }
   }
 
-  //Validation check for board
-
-  //(Thru our game controller, maybe collect (i,j), and check if cell at i, j is visited
-  const checkVisited = (i, j) => {
-    grid[i][j].visited;
+  const placeMove = (i, j, currentPlayer) => {
+    //If the move already has a token, return
+    if (grid[i][j].getTokenType() !== 0) {
+      alert("invalid move!");
+      return 0;
+    } else {
+      //Place the token at (i,j)
+      grid[i][j].setTokenType(currentPlayer.token);
+      return 1;
+    }
   };
 
-  return { grid, checkVisited };
+  //Check if a move of the current player is a winning move, placed at (i,j).
+  const checkWinningMove = (currentPlayer) => {
+    //checks straights
+    for (let i = 0; i < rows; i++) {
+      let streakV = 0,
+        streakH = 0;
+
+      for (let j = 0; j < cols; j++) {
+        if (grid[i][j].getTokenType() === currentPlayer.token) streakH++;
+      }
+
+      for (let j = 0; j < cols; j++) {
+        if (grid[j][i].getTokenType() === currentPlayer.token) streakV++;
+      }
+
+      if (streakV == 3 || streakH == 3) {
+        console.log("Straights");
+        return 1;
+      }
+    }
+
+    //Checks the 2 diagonals
+    if (grid[1][1].getTokenType() === currentPlayer.token) {
+      if (
+        (grid[0][0].getTokenType() == grid[1][1].getTokenType() &&
+          grid[2][2].getTokenType() == grid[1][1].getTokenType()) ||
+        (grid[0][2].getTokenType() == grid[1][1].getTokenType() &&
+          grid[2][0].getTokenType() == grid[1][1].getTokenType())
+      ) {
+        console.log("Diagonals");
+        return 1;
+      }
+    }
+
+    return 0;
+  };
+
+  const checkVisited = (i, j) => {
+    grid[i][j].getTokenType != 0;
+  };
+
+  const print = () => {
+    console.log("bruh");
+    for (let i = 0; i < rows; i++) {
+      let row = "";
+      for (let j = 0; j < cols; j++) {
+        if (grid[i][j].getTokenType() === 0) row += " ";
+        else row += grid[i][j].getTokenType();
+        row += "|";
+      }
+      console.log(row);
+      console.log("---------");
+    }
+  };
+
+  return { grid, checkVisited, checkWinningMove, placeMove, print };
 })();
 
 //Contains information of each cell--
-// {visited, tokenType}
+// {tokenType}, 0 : unvisited, 1 : "X", 2: "O"
 function Cell() {
-  let visited = 0;
   let tokenType = 0;
 
   //Gets visited & token type
   const getTokenType = () => tokenType;
-  const ifVisited = () => visited;
-
   //Sets visited & token types
   const setTokenType = (type) => (tokenType = type);
-  const setVisited = () => (visited = 1);
 
-  return { visited, tokenType };
+  return { getTokenType, setTokenType };
 }
 
 const gameController = (function () {
-  let board = gameBoard.grid;
+  let board = gameBoard;
   let winner = null;
+
+  //Put user inputted names later
   let players = [
-    { name: "player1", token: "O" },
-    { name: "player2", token: "X" },
+    { name: "player1", token: "X" },
+    { name: "player2", token: "O" },
   ];
 
   let currentPlayer = players[0];
@@ -58,25 +116,38 @@ const gameController = (function () {
   const getCurrentPlayer = () => currentPlayer;
   const switchTurns = (oldPlayer) => {
     currentPlayer = oldPlayer === players[0] ? players[1] : players[0];
-    console.log(currentPlayer);
-  };
-
-  //Check if a move of the current player is a winning move, placed at (i,j).
-  const checkWinMove = (i, j) => {
-    // if(board[i][j].visited)
   };
 
   const currentRound = () => {
     // console.log(currentPlayer);
     //Get's the current player's to do a turn.
-    let i, j;
-    prompt(`It is ${getCurrentPlayer().name}'s turn!`, i, j);
-    switchTurns(getCurrentPlayer());
-    //Then check validity w/ check move
-    //Then check if winning move
+
+    let input = prompt(`It is ${getCurrentPlayer().name}'s turn!`);
+
+    input = input.split(" ");
+
+    let [i, j] = [input[0], input[1]];
+
+    console.log(input);
+
+    //Switch turns if the move is not invalid
+    if (board.placeMove(i, j, currentPlayer) !== 0) {
+      //Display the board
+      board.print();
+
+      //Then check if winning move
+      if (board.checkWinningMove(currentPlayer) === 1) {
+        winner = currentPlayer;
+        console.log(currentPlayer + " has won!~");
+        return;
+      }
+      switchTurns(getCurrentPlayer());
+    }
+
     //Then get the others players' turn
+    currentRound();
   };
-  currentRound();
+
   currentRound();
 
   return { board, winner, players, getCurrentPlayer, currentRound };
