@@ -5,12 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link rel="stylesheet" href="styles.css" />
-    <!-- <script src="script.js"></script> -->
+    <script type="module" src="script.js"></script>
   </head>
   <body>
     <div class="container">
       <div class="title">Tic-Tac-Toe</div>
-      <!-- <div class="menu"></div> -->
+      <!-- hidden -->
+      <div class="start-page hidden">
+        <form>
+          <div class="bruh">
+            <div class="card">
+              <label>
+                (X) Player 1's Name:
+                <input type="text" />
+              </label>
+            </div>
+            <div class="card">
+              <label>
+                (O) Player 2's Name:
+                <input type="text" />
+              </label>
+            </div>
+          </div>
+          <button class="start-game-button">Start Game</button>
+        </form>
+      </div>
+      <!-- hidden -->
       <div class="game-menu hidden">
         <div class="player1Side">
           <div class="player1Name">Player 1:</div>
@@ -20,22 +40,24 @@
         <div class="game">
           <div class="current-turn">Current turn: <span>name</span></div>
           <div class="grid">
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
-            <div class="cell">x</div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
           </div>
-        </div>
-        <div class="player2Side">
+          <button class ="restart-button">Play Again?</div>
+       
+          <div class="player2Side">
           <div class="player2Name">Player 2:</div>
 
           <div class="player2Score">Wins:</div>
         </div>
+        
       </div>
     </div>
   </body>

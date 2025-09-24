@@ -3,7 +3,7 @@
 //Try to have little global code as possible~
 
 //Our grid and where we place our moves.
-const gameBoard = (function () {
+const gameBoard = function () {
   let rows = 3;
   let cols = 3;
 
@@ -23,6 +23,8 @@ const gameBoard = (function () {
 
   const placeMove = (i, j, currentPlayer) => {
     //If the move already has a token, return
+
+    console.log("Type:" + grid[i][j].getTokenType());
     if (grid[i][j].getTokenType() !== 0) {
       alert("invalid move!");
       return 0;
@@ -70,41 +72,17 @@ const gameBoard = (function () {
     return 0;
   };
 
-  const checkVisited = (i, j) => {
-    grid[i][j].getTokenType != 0;
-  };
+  const getGrid = (i, j) => grid[Number(i)][Number(j)].getTokenType();
 
   return {
     grid,
-    checkVisited,
     checkWinningMove,
     placeMove,
     getRows,
     getCols,
+    getGrid,
   };
-})();
-
-const displayController = (function () {
-  const print = (board) => {
-    let rows = board.getRows();
-    let cols = board.getCols();
-    let grid = board.grid;
-
-    console.log(rows + " and " + cols);
-    for (let i = 0; i < rows; i++) {
-      let row = "";
-      for (let j = 0; j < cols; j++) {
-        if (grid[i][j].getTokenType() === 0) row += " ";
-        else row += grid[i][j].getTokenType();
-        row += "|";
-      }
-      console.log(row);
-      console.log("---------");
-    }
-  };
-
-  return { print };
-})();
+};
 
 //Contains information of each cell--
 // {tokenType}, 0 : unvisited, 1 : "X", 2: "O"
@@ -119,36 +97,19 @@ function Cell() {
   return { getTokenType, setTokenType };
 }
 
-const userInput = (function () {
-  let name1 = "",
-    name2 = "";
-
-  name1 = prompt("Name for player 1");
-  name2 = prompt("Name for player 2");
-
-  const getName1 = () => name1;
-
-  const getName2 = () => name2;
-
-  return { getName1, getName2 };
-})();
-
-const gameController = (function () {
-  let board = gameBoard;
+const gameController = function () {
+  let board = gameBoard();
   let winner = null;
-  const user = userInput;
-  let display = displayController;
 
   //Put user inputted names later
   let players = [
-    { name: user.getName1(), playerNumber: 1, token: "X" },
-    { name: user.getName2(), playerNumber: 2, token: "O" },
+    { name: "kaiser", playerNumber: 1, token: "X" },
+    { name: "rin", playerNumber: 2, token: "O" },
   ];
-
-  console.log(user.getName1);
 
   let currentPlayer = players[0];
 
+  const getCurrentPlayerName = () => currentPlayer.name;
   const getCurrentPlayer = () => currentPlayer;
   const getCurrentPlayerNumber = () => currentPlayer.playerNumber;
 
@@ -156,26 +117,11 @@ const gameController = (function () {
     currentPlayer = oldPlayer === players[0] ? players[1] : players[0];
   };
 
-  const currentRound = () => {
-    // console.log(currentPlayer);
-    //Get's the current player's to do a turn.
-
-    let input = prompt(
-      `It is Player ${getCurrentPlayerNumber()}: ${
-        getCurrentPlayer().name
-      }'s turn!`
-    );
-
-    input = input.split(" ");
-
-    let [i, j] = [input[0], input[1]];
-
-    console.log(input);
-
+  const currentRound = (i, j) => {
     //Switch turns if the move is not invalid
-    if (board.placeMove(i, j, currentPlayer) !== 0) {
+    if (board.placeMove(i, j, currentPlayer) === 1) {
       //Display the board
-      display.print(board);
+      // display.print(board);
 
       //Then check if winning move
       if (board.checkWinningMove(currentPlayer) === 1) {
@@ -185,12 +131,10 @@ const gameController = (function () {
       }
       switchTurns(getCurrentPlayer());
     }
-
-    //Then get the others players' turn
-    currentRound();
   };
 
-  currentRound();
+  const getWinner = () => winner;
+  const getGrid = (i, j) => board.getGrid(i, j);
 
   return {
     board,
@@ -199,5 +143,45 @@ const gameController = (function () {
     getCurrentPlayer,
     currentRound,
     getCurrentPlayerNumber,
+    getCurrentPlayerName,
+    getGrid,
+    switchTurns,
+    getWinner,
   };
+};
+
+const displayController = (function () {
+  const game = gameController();
+  const playerTurnText = document.querySelector(".current-turn");
+  const playerName = playerTurnText.querySelector("span");
+  const grid = document.querySelector(".grid");
+  const cells = document.querySelectorAll(".cell");
+
+  playerName.textContent = game.getCurrentPlayerName();
+
+  let cnt = 0;
+  //assign each cell with coordinate id's
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      cells[cnt++].setAttribute("id", i + "," + j);
+    }
+  }
+
+  cells.forEach((cell) => {
+    cell.addEventListener("click", (e) => {
+      //Only runs when there's no winner yet.
+      if (game.getWinner() === null) {
+        let coords = e.target.id.split(",");
+        let [i, j] = [Number(coords[0]), Number(coords[1])];
+
+        console.log(i, j);
+        game.currentRound(i, j);
+        cell.textContent = game.getGrid(i, j);
+        // game.switchTurns(game.getCurrentPlayer());
+        playerName.textContent = game.getCurrentPlayerName();
+      }
+    });
+  });
+
+  return {};
 })();
