@@ -9,6 +9,9 @@ const gameBoard = (function () {
 
   let grid = [];
 
+  const getRows = () => rows;
+  const getCols = () => cols;
+
   //Sets up our 3x3 grid
   for (let i = 0; i < rows; i++) {
     grid[i] = [];
@@ -71,8 +74,23 @@ const gameBoard = (function () {
     grid[i][j].getTokenType != 0;
   };
 
-  const print = () => {
-    console.log("bruh");
+  return {
+    grid,
+    checkVisited,
+    checkWinningMove,
+    placeMove,
+    getRows,
+    getCols,
+  };
+})();
+
+const displayController = (function () {
+  const print = (board) => {
+    let rows = board.getRows();
+    let cols = board.getCols();
+    let grid = board.grid;
+
+    console.log(rows + " and " + cols);
     for (let i = 0; i < rows; i++) {
       let row = "";
       for (let j = 0; j < cols; j++) {
@@ -85,7 +103,7 @@ const gameBoard = (function () {
     }
   };
 
-  return { grid, checkVisited, checkWinningMove, placeMove, print };
+  return { print };
 })();
 
 //Contains information of each cell--
@@ -101,19 +119,39 @@ function Cell() {
   return { getTokenType, setTokenType };
 }
 
+const userInput = (function () {
+  let name1 = "",
+    name2 = "";
+
+  name1 = prompt("Name for player 1");
+  name2 = prompt("Name for player 2");
+
+  const getName1 = () => name1;
+
+  const getName2 = () => name2;
+
+  return { getName1, getName2 };
+})();
+
 const gameController = (function () {
   let board = gameBoard;
   let winner = null;
+  const user = userInput;
+  let display = displayController;
 
   //Put user inputted names later
   let players = [
-    { name: "player1", token: "X" },
-    { name: "player2", token: "O" },
+    { name: user.getName1(), playerNumber: 1, token: "X" },
+    { name: user.getName2(), playerNumber: 2, token: "O" },
   ];
+
+  console.log(user.getName1);
 
   let currentPlayer = players[0];
 
   const getCurrentPlayer = () => currentPlayer;
+  const getCurrentPlayerNumber = () => currentPlayer.playerNumber;
+
   const switchTurns = (oldPlayer) => {
     currentPlayer = oldPlayer === players[0] ? players[1] : players[0];
   };
@@ -122,7 +160,11 @@ const gameController = (function () {
     // console.log(currentPlayer);
     //Get's the current player's to do a turn.
 
-    let input = prompt(`It is ${getCurrentPlayer().name}'s turn!`);
+    let input = prompt(
+      `It is Player ${getCurrentPlayerNumber()}: ${
+        getCurrentPlayer().name
+      }'s turn!`
+    );
 
     input = input.split(" ");
 
@@ -133,7 +175,7 @@ const gameController = (function () {
     //Switch turns if the move is not invalid
     if (board.placeMove(i, j, currentPlayer) !== 0) {
       //Display the board
-      board.print();
+      display.print(board);
 
       //Then check if winning move
       if (board.checkWinningMove(currentPlayer) === 1) {
@@ -150,5 +192,12 @@ const gameController = (function () {
 
   currentRound();
 
-  return { board, winner, players, getCurrentPlayer, currentRound };
+  return {
+    board,
+    winner,
+    players,
+    getCurrentPlayer,
+    currentRound,
+    getCurrentPlayerNumber,
+  };
 })();
