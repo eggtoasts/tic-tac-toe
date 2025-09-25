@@ -115,8 +115,8 @@ const gameController = function () {
 
   //Put user inputted names later
   let players = [
-    { name: "kaiser", playerNumber: 1, token: "X", wins: 0 },
-    { name: "rin", playerNumber: 2, token: "O", wins: 0 },
+    { name: "Player X", playerNumber: 1, token: "X", wins: 0 },
+    { name: "Player O", playerNumber: 2, token: "O", wins: 0 },
   ];
 
   let currentPlayer = players[0];
@@ -167,6 +167,7 @@ const gameController = function () {
     clearGrid();
     currentPlayer = players[0];
     winner = null;
+    moves = 0;
   };
 
   return {
@@ -200,6 +201,9 @@ const displayController = (function () {
   const player1ScoreText = document.querySelector(".player1Score");
   const player2ScoreText = document.querySelector(".player2Score");
 
+  const player1Crown = document.querySelector(".hide1Crown");
+  const player2Crown = document.querySelector(".hide2Crown");
+
   let cnt = 0;
   //assign each cell with coordinate id's
   for (let i = 0; i < 3; i++) {
@@ -223,6 +227,15 @@ const displayController = (function () {
     });
   };
 
+  const displayWinner = function (winner) {
+    console.log(winner.playerNumber);
+    if (winner.playerNumber == 1) {
+      player1Crown.classList.remove("hidden");
+    } else {
+      player2Crown.classList.remove("hidden");
+    }
+  };
+
   cells.forEach((cell) => {
     cell.addEventListener("click", (e) => {
       if (game.getWinner() === null && game.getMoves() < 9) {
@@ -240,9 +253,20 @@ const displayController = (function () {
         if (game.getWinner() !== null) {
           let winnerText = game.getWinner().name;
           playerTurnText.textContent = "Winner: " + winnerText;
+
+          console.log(game.getWinner());
+          console.log(player1Crown);
+          console.log(player2Crown);
+
+          //Toggle winner displays
+          displayWinner(game.getWinner());
+          restartButton.classList.toggle("hidden");
         } else if (game.getWinner() === null && game.getMoves() === 9) {
           //A draw happened instead
           playerTurnText.textContent = "Draw!";
+
+          //Toggle winner displays
+          restartButton.classList.toggle("hidden");
         }
       }
     });
@@ -251,6 +275,13 @@ const displayController = (function () {
   restartButton.addEventListener("click", (e) => {
     game.clearGame();
     display();
+
+    //Hides button
+    restartButton.classList.toggle("hidden");
+
+    //Hides crowns
+    player1Crown.classList.add("hidden");
+    player2Crown.classList.add("hidden");
   });
 
   //Initial call
