@@ -112,7 +112,7 @@ label {
 
   grid-template: repeat(3, 1fr) / repeat(3, 1fr);
 
-  margin-bottom: 80px;
+  margin-bottom: 46px;
 }
 
 .cell {

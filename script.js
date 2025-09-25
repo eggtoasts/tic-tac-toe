@@ -112,8 +112,8 @@ const gameController = function () {
 
   //Put user inputted names later
   let players = [
-    { name: "kaiser", playerNumber: 1, token: "X" },
-    { name: "rin", playerNumber: 2, token: "O" },
+    { name: "kaiser", playerNumber: 1, token: "X", wins: 0 },
+    { name: "rin", playerNumber: 2, token: "O", wins: 0 },
   ];
 
   let currentPlayer = players[0];
@@ -134,15 +134,22 @@ const gameController = function () {
 
       //Then check if winning move
       if (board.checkWinningMove(currentPlayer) === 1) {
-        winner = currentPlayer;
         console.log(currentPlayer + " has won!~");
+
+        winner = currentPlayer;
+        incrementWin(currentPlayer);
         return;
       }
       switchTurns(getCurrentPlayer());
     }
   };
 
+  const getPlayer1 = () => players[0];
+  const getPlayer2 = () => players[1];
+
   const getWinner = () => winner;
+  const getWinsOfPlayer = (player) => player.wins;
+  const incrementWin = (player) => currentPlayer.wins++;
   const getGrid = (i, j) => board.getGrid(i, j);
   const clearGrid = (i, j) => board.clearGrid(i, j);
 
@@ -156,6 +163,8 @@ const gameController = function () {
     board,
     winner,
     players,
+    getPlayer1,
+    getPlayer2,
     getCurrentPlayer,
     currentRound,
     getCurrentPlayerNumber,
@@ -163,6 +172,7 @@ const gameController = function () {
     getGrid,
     switchTurns,
     getWinner,
+    getWinsOfPlayer,
     clearGrid,
     clearGame,
   };
@@ -176,7 +186,8 @@ const displayController = (function () {
   const cells = document.querySelectorAll(".cell");
   const restartButton = document.querySelector(".restart-button");
 
-  playerName.textContent = game.getCurrentPlayerName();
+  const player1ScoreText = document.querySelector(".player1Score");
+  const player2ScoreText = document.querySelector(".player2Score");
 
   let cnt = 0;
   //assign each cell with coordinate id's
@@ -187,13 +198,17 @@ const displayController = (function () {
   }
 
   const display = function () {
-    playerName.textContent = game.getCurrentPlayerName();
-    cells.forEach((cell) => {
-      let coords = cell.id;
-      console.log(coords);
-      let [i, j] = [Number(coords[0]), Number(coords[1])];
+    playerTurnText.textContent = "Current turn: " + game.getCurrentPlayerName();
+    player1ScoreText.textContent = "Wins: " + game.getPlayer1().wins;
+    player2ScoreText.textContent = "Wins: " + game.getPlayer2().wins;
 
-      cell.textContent = "";
+    cells.forEach((cell) => {
+      let coords = cell.getAttribute("id").split(",");
+
+      let [i, j] = [Number(coords[0]), Number(coords[1])];
+      let currToken = game.getGrid(i, j);
+
+      cell.textContent = currToken === 0 ? "" : currToken;
     });
   };
 
@@ -203,14 +218,12 @@ const displayController = (function () {
         let coords = e.target.id.split(",");
         let [i, j] = [Number(coords[0]), Number(coords[1])];
 
-        console.log(i, j);
         game.currentRound(i, j);
-        cell.textContent = game.getGrid(i, j);
-
-        playerName.textContent = game.getCurrentPlayerName();
+        display();
 
         if (game.getWinner() !== null) {
-          playerName.textContent = "Player wins!";
+          let winnerText = game.getWinner().name;
+          playerTurnText.textContent = "Winner: " + winnerText;
         }
       }
     });
@@ -220,6 +233,9 @@ const displayController = (function () {
     game.clearGame();
     display();
   });
+
+  //Initial call
+  display();
 
   return {};
 })();
