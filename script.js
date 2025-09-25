@@ -110,6 +110,9 @@ const gameController = function () {
   let board = gameBoard();
   let winner = null;
 
+  //To keep track of draws
+  let moves = 0;
+
   //Put user inputted names later
   let players = [
     { name: "kaiser", playerNumber: 1, token: "X", wins: 0 },
@@ -129,8 +132,8 @@ const gameController = function () {
   const currentRound = (i, j) => {
     //Switch turns if the move is not invalid
     if (board.placeMove(i, j, currentPlayer) === 1) {
-      //Display the board
-      // display.print(board);
+      //The move is valid, so we increment the number of moves made
+      incrementMoves();
 
       //Then check if winning move
       if (board.checkWinningMove(currentPlayer) === 1) {
@@ -139,7 +142,12 @@ const gameController = function () {
         winner = currentPlayer;
         incrementWin(currentPlayer);
         return;
+      } else if (getMoves() == 9) {
+        //If there aren't any moves to be made and no one won, it is a draw.
+        return;
       }
+
+      //Switch turns
       switchTurns(getCurrentPlayer());
     }
   };
@@ -150,6 +158,8 @@ const gameController = function () {
   const getWinner = () => winner;
   const getWinsOfPlayer = (player) => player.wins;
   const incrementWin = (player) => currentPlayer.wins++;
+  const incrementMoves = () => moves++;
+  const getMoves = () => moves;
   const getGrid = (i, j) => board.getGrid(i, j);
   const clearGrid = (i, j) => board.clearGrid(i, j);
 
@@ -175,6 +185,7 @@ const gameController = function () {
     getWinsOfPlayer,
     clearGrid,
     clearGame,
+    getMoves,
   };
 };
 
@@ -214,16 +225,24 @@ const displayController = (function () {
 
   cells.forEach((cell) => {
     cell.addEventListener("click", (e) => {
-      if (game.getWinner() === null) {
+      if (game.getWinner() === null && game.getMoves() < 9) {
+        //Splits the id containing the grid coordinates (i,j)
         let coords = e.target.id.split(",");
         let [i, j] = [Number(coords[0]), Number(coords[1])];
 
+        //Passes (i,j) as a move
         game.currentRound(i, j);
+
+        //Displays the grid
         display();
 
+        //Game has a winner
         if (game.getWinner() !== null) {
           let winnerText = game.getWinner().name;
           playerTurnText.textContent = "Winner: " + winnerText;
+        } else if (game.getWinner() === null && game.getMoves() === 9) {
+          //A draw happened instead
+          playerTurnText.textContent = "Draw!";
         }
       }
     });

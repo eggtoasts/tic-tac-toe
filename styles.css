@@ -125,9 +125,19 @@ label {
   font-size: 40px;
   text-align: center;
   min-width: 180px;
+  position: relative;
 }
 
 .player2Side {
   grid-column: 3;
   grid-row: 1 / -1;
+}
+
+.iconify {
+  color: gold;
+  position: absolute;
+  right: 160px;
+  bottom: 94px;
+  rotate: -30deg;
+  font-size: 60px;
 }
